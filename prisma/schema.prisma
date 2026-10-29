@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// MODUL A: VEHICLE & COMMUTE TRACKER
+// ==========================================
+
+model FuelLog {
+  id          String   @id @default(cuid())
+  date        DateTime @default(now())
+  odometer    Float    // kilometer pembacaan speedometer saat ini
+  liters      Float    // volume bensin yang dibeli
+  priceTotal  Float    // total biaya yang dikeluarkan (Rp)
+  fuelType    String?  @default("Pertalite") // Pertalite, Pertamax, Shell Super, dll
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model MaintenanceLog {
+  id          String   @id @default(cuid())
+  date        DateTime @default(now())
+  serviceType String   // Ganti Oli Mesin, Oli Gardan, Kampas Rem, Servis CVT/Karbu, Ban, dll
+  odometer    Float    // kilometer saat diservis
+  nextOdoDue  Float?   // rekomendasi kilometer servis berikutnya
+  cost        Float    // total biaya bengkel (Rp)
+  workshop    String?  // nama bengkel / mekanik
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model TripExpense {
+  id          String   @id @default(cuid())
+  date        DateTime @default(now())
+  category    String   // Parkir, Tol, Cuci Motor/Mobil, Tambal Ban, Aksesoris
+  amount      Float    // total biaya (Rp)
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now())
+}
+
+// ==========================================
+// MODUL F: LEND & BORROW TRACKER
+// ==========================================
+
+enum LendType {
+  LENT_OUT // Kita meminjamkan ke orang lain
+  BORROWED // Kita meminjam dari orang lain
+}
+
+enum ItemType {
+  MONEY // Berupa uang (nominal Rp)
+  ITEM  // Berupa barang (helm, charger, jaket, dsb)
+}
+
+enum LendStatus {
+  ACTIVE   // Masih belum kembali / belum lunas
+  RETURNED // Sudah dikembalikan / sudah lunas
+}
+
+model LendBorrow {
+  id          String     @id @default(cuid())
+  personName  String     // Nama teman / kontak terkait
+  lendType    LendType   // LENT_OUT atau BORROWED
+  itemType    ItemType   // MONEY atau ITEM
+  itemName    String?    // Nama barang (jika itemType == ITEM)
+  amount      Float?     // Nominal uang (jika itemType == MONEY)
+  startDate   DateTime   @default(now()) // Tanggal pinjam
+  dueDate     DateTime?  // Target tanggal pengembalian
+  returnDate  DateTime?  // Tanggal nyata dikembalikan
+  status      LendStatus @default(ACTIVE)
+  notes       String?    @db.Text
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
